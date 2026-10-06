@@ -114,6 +114,13 @@ def to_ranges(indices):
     return ",".join(parts)
 
 
+def highlight_line(old, new):
+    old_s = old.decode("utf-8", "surrogateescape")
+    new_s = new.decode("utf-8", "surrogateescape")
+    d, a = myers(old_s, new_s)
+    return ("? %s | %s\n" % (to_ranges(d), to_ranges(a))).encode("utf-8")
+
+
 def run(path_a, path_b, with_highlight):
     a = read_lines(path_a)
     b = read_lines(path_b)
