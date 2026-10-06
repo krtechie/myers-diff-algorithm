@@ -1,4 +1,5 @@
 import sys
+from array import array
 
 
 def _myers_core(a, b):
@@ -8,6 +9,9 @@ def _myers_core(a, b):
     offset = max_d + 1            # v[offset + k] is the furthest x on diagonal k
     v = [0] * (2 * max_d + 3)
 
+    # snaps[d] holds v after round d, only for the diagonals that round could
+    # touch (k = -d, -d+2, ..., d). Index of diagonal k is (k + d) // 2.
+    snaps = []
     final_d = 0
 
     for d in range(max_d + 1):
@@ -29,8 +33,9 @@ def _myers_core(a, b):
         if done:
             final_d = d
             break
+        snaps.append(array('i', v[offset - d: offset + d + 1: 2]))
 
-    return final_d
+    return final_d, snaps
 
 
 def read_lines(path):
