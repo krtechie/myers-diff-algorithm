@@ -35,7 +35,27 @@ def _myers_core(a, b):
             break
         snaps.append(array('i', v[offset - d: offset + d + 1: 2]))
 
-    return final_d, snaps
+    # Walk back from (n, m) to (0, 0) and record the edits.
+    dels, adds = [], []
+    x, y = n, m
+    for d in range(final_d, 0, -1):
+        vs = snaps[d - 1]       # v after round d-1; diagonal kk is at (kk + d - 1) // 2
+        k = x - y
+        if k == -d or (k != d and vs[(k - 1 + d - 1) >> 1] < vs[(k + 1 + d - 1) >> 1]):
+            prev_k = k + 1
+        else:
+            prev_k = k - 1
+        prev_x = vs[(prev_k + d - 1) >> 1]
+        prev_y = prev_x - prev_k
+        if prev_k == k + 1:
+            adds.append(prev_y)         # went down: b[prev_y] was inserted
+        else:
+            dels.append(prev_x)         # went right: a[prev_x] was deleted
+        x, y = prev_x, prev_y
+
+    dels.reverse()
+    adds.reverse()
+    return dels, adds
 
 
 def read_lines(path):
