@@ -60,6 +60,9 @@ def _myers_core(a, b):
         done = False
         for k in range(-d, d + 1, 2):
             idx = offset + k
+            # Pick the better neighbour diagonal. Coming from k+1 is a move down
+            # (we consume a line of b, an insertion). Coming from k-1 is a move
+            # right (we consume a line of a, a deletion).
             if k == -d or (k != d and v[idx - 1] < v[idx + 1]):
                 x = v[idx + 1]          # move down: an insertion
             else:
@@ -70,6 +73,7 @@ def _myers_core(a, b):
                     x += 1
                     y += 1
             v[idx] = x
+            # Reached the bottom right corner, so d is the minimal edit count.
             if x >= n and y >= m:
                 done = True
                 break
@@ -83,13 +87,17 @@ def _myers_core(a, b):
     x, y = n, m
     for d in range(final_d, 0, -1):
         vs = snaps[d - 1]       # v after round d-1; diagonal kk is at (kk + d - 1) // 2
-        k = x - y
+        k = x - y               # the diagonal we are standing on
+        # Same choice as the forward pass, run backwards: did we arrive from
+        # diagonal k+1 (a move down) or from k-1 (a move right)?
         if k == -d or (k != d and vs[(k - 1 + d - 1) >> 1] < vs[(k + 1 + d - 1) >> 1]):
             prev_k = k + 1
         else:
             prev_k = k - 1
-        prev_x = vs[(prev_k + d - 1) >> 1]
+        prev_x = vs[(prev_k + d - 1) >> 1]      # where that diagonal had reached
         prev_y = prev_x - prev_k
+        # The snake after this edit was all matches, so we can jump straight
+        # back to the point where the edit happened.
         if prev_k == k + 1:
             adds.append(prev_y)         # went down: b[prev_y] was inserted
         else:
@@ -127,6 +135,8 @@ def to_ranges(indices):
 
 
 def highlight_line(old, new):
+    # surrogateescape keeps every byte, so positions still line up even if a
+    # line is not valid UTF-8. Ranges count code points, not bytes.
     old_s = old.decode("utf-8", "surrogateescape")
     new_s = new.decode("utf-8", "surrogateescape")
     d, a = myers(old_s, new_s)
@@ -160,11 +170,14 @@ def run(path_a, path_b, with_highlight):
         while j < m and add_mark[j]:
             j += 1
         if i > i0 or j > j0:
-            # One change block: every - line first, then every + line.
+            # A change block is a run of deleted lines in a plus a run of
+            # inserted lines in b, with no kept line between them.
+            # Print every - line first, then every + line.
             for p in range(i0, i):
                 out.append(b"-" + a[p] + b"\n")
             for q in range(j0, j):
                 out.append(b"+" + b[q] + b"\n")
+                # pair the 1st - with the 1st +, the 2nd with the 2nd, and so on
                 if with_highlight and q - j0 < i - i0:
                     out.append(highlight_line(a[i0 + (q - j0)], b[q]))
         else:
