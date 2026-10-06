@@ -108,6 +108,35 @@ def run(path_a, path_b, with_highlight):
     ids_b = [table.setdefault(line, len(table)) for line in b]
 
     dels, adds = myers(ids_a, ids_b)
+    n, m = len(a), len(b)
+    del_mark = bytearray(n)
+    add_mark = bytearray(m)
+    for i in dels:
+        del_mark[i] = 1
+    for j in adds:
+        add_mark[j] = 1
+
+    out = []
+    i = j = 0
+    while i < n or j < m:
+        i0, j0 = i, j
+        while i < n and del_mark[i]:
+            i += 1
+        while j < m and add_mark[j]:
+            j += 1
+        if i > i0 or j > j0:
+            # One change block: every - line first, then every + line.
+            for p in range(i0, i):
+                out.append(b"-" + a[p] + b"\n")
+            for q in range(j0, j):
+                out.append(b"+" + b[q] + b"\n")
+        else:
+            out.append(b" " + a[i] + b"\n")
+            i += 1
+            j += 1
+
+    sys.stdout.buffer.write(b"".join(out))
+    sys.stdout.buffer.flush()
 
 
 def main():
