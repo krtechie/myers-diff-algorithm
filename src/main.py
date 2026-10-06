@@ -1,6 +1,38 @@
 import sys
 
 
+def _myers_core(a, b):
+    n, m = len(a), len(b)
+
+    max_d = n + m
+    offset = max_d + 1            # v[offset + k] is the furthest x on diagonal k
+    v = [0] * (2 * max_d + 3)
+
+    final_d = 0
+
+    for d in range(max_d + 1):
+        done = False
+        for k in range(-d, d + 1, 2):
+            idx = offset + k
+            if k == -d or (k != d and v[idx - 1] < v[idx + 1]):
+                x = v[idx + 1]          # move down: an insertion
+            else:
+                x = v[idx - 1] + 1      # move right: a deletion
+            y = x - k
+            while x < n and y < m and a[x] == b[y]:   # follow the snake
+                x += 1
+                y += 1
+            v[idx] = x
+            if x >= n and y >= m:
+                done = True
+                break
+        if done:
+            final_d = d
+            break
+
+    return final_d
+
+
 def read_lines(path):
     with open(path, "rb") as f:
         data = f.read()
