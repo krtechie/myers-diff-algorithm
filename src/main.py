@@ -2,6 +2,37 @@ import sys
 from array import array
 
 
+def myers(a, b):
+    """Minimal diff of two sequences.
+
+    Returns (dels, adds): sorted lists of indices. dels are positions in a that
+    are deleted, adds are positions in b that are inserted. Everything else is
+    kept, in order.
+    """
+    n, m = len(a), len(b)
+
+    # 1. Trim the common prefix and suffix. On real files most lines match,
+    #    so this removes almost all of the work before Myers even starts.
+    lo = 0
+    while lo < n and lo < m and a[lo] == b[lo]:
+        lo += 1
+    hi_a, hi_b = n, m
+    while hi_a > lo and hi_b > lo and a[hi_a - 1] == b[hi_b - 1]:
+        hi_a -= 1
+        hi_b -= 1
+
+    core_a = list(a[lo:hi_a])
+    core_b = list(b[lo:hi_b])
+
+    if not core_a:
+        return [], list(range(lo, hi_b))
+    if not core_b:
+        return list(range(lo, hi_a)), []
+
+    dels, adds = _myers_core(core_a, core_b)
+    return [x + lo for x in dels], [y + lo for y in adds]
+
+
 def _myers_core(a, b):
     n, m = len(a), len(b)
 
