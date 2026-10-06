@@ -153,6 +153,8 @@ def run(path_a, path_b, with_highlight):
                 out.append(b"-" + a[p] + b"\n")
             for q in range(j0, j):
                 out.append(b"+" + b[q] + b"\n")
+                if with_highlight and q - j0 < i - i0:
+                    out.append(highlight_line(a[i0 + (q - j0)], b[q]))
         else:
             out.append(b" " + a[i] + b"\n")
             i += 1
