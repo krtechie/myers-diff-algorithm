@@ -98,6 +98,22 @@ def read_lines(path):
     return lines
 
 
+def to_ranges(indices):
+    """[3,4,5,9] -> '3-6,9-10', and [] -> '.'"""
+    if not indices:
+        return "."
+    parts = []
+    start = prev = indices[0]
+    for i in indices[1:]:
+        if i == prev + 1:
+            prev = i
+            continue
+        parts.append("%d-%d" % (start, prev + 1))
+        start = prev = i
+    parts.append("%d-%d" % (start, prev + 1))
+    return ",".join(parts)
+
+
 def run(path_a, path_b, with_highlight):
     a = read_lines(path_a)
     b = read_lines(path_b)
