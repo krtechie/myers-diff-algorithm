@@ -1,12 +1,29 @@
 import sys
 
 
-def main() -> int:
+def read_lines(path):
+    with open(path, "rb") as f:
+        data = f.read()
+    lines = data.split(b"\n")
+    if lines and lines[-1] == b"":
+        lines.pop()
+    return lines
+
+
+def run(path_a, path_b, with_highlight):
+    a = read_lines(path_a)
+    b = read_lines(path_b)
+
+
+def main():
     if len(sys.argv) != 4 or sys.argv[1] not in ("lines", "highlight"):
-        print("usage: main.py lines|highlight A_PATH B_PATH", file=sys.stderr)
+        sys.stderr.write("usage: main.py lines|highlight A B\n")
         return 2
-    command, a_path, b_path = sys.argv[1:]
-    # TODO: read both files as raw bytes (brief, Section 2), then print the listing.
+    try:
+        run(sys.argv[2], sys.argv[3], sys.argv[1] == "highlight")
+    except OSError as e:
+        sys.stderr.write("cannot read file: %s\n" % e)
+        return 2
     return 0
 
 
