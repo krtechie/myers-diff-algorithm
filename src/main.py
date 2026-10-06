@@ -1,3 +1,10 @@
+"""
+Myers' O(ND) diff.
+
+    python src/main.py lines A B       Part A: minimal line diff
+    python src/main.py highlight A B   Part B: line diff plus changed-character ranges
+"""
+
 import sys
 from array import array
 
