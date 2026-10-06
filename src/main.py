@@ -102,6 +102,13 @@ def run(path_a, path_b, with_highlight):
     a = read_lines(path_a)
     b = read_lines(path_b)
 
+    # Turn each distinct line into a small int so comparisons are cheap.
+    table = {}
+    ids_a = [table.setdefault(line, len(table)) for line in a]
+    ids_b = [table.setdefault(line, len(table)) for line in b]
+
+    dels, adds = myers(ids_a, ids_b)
+
 
 def main():
     if len(sys.argv) != 4 or sys.argv[1] not in ("lines", "highlight"):
