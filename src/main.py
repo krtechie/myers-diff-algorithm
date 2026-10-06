@@ -36,6 +36,10 @@ def myers(a, b):
 def _myers_core(a, b):
     n, m = len(a), len(b)
 
+    # Sentinels that match nothing, so the snake loop needs no bounds checks.
+    a.append(None)
+    b.append(-1)
+
     max_d = n + m
     offset = max_d + 1            # v[offset + k] is the furthest x on diagonal k
     v = [0] * (2 * max_d + 3)
@@ -54,9 +58,10 @@ def _myers_core(a, b):
             else:
                 x = v[idx - 1] + 1      # move right: a deletion
             y = x - k
-            while x < n and y < m and a[x] == b[y]:   # follow the snake
-                x += 1
-                y += 1
+            if x <= n and y <= m:       # skip points that fell off the grid
+                while a[x] == b[y]:     # follow the snake
+                    x += 1
+                    y += 1
             v[idx] = x
             if x >= n and y >= m:
                 done = True
